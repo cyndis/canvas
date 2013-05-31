@@ -45,6 +45,7 @@ void MainWindow::updateWacom(float x, float y, float p)
 
     if (down) {
         QPainter ptr(&_pixmap);
+        ptr.setRenderHint(QPainter::Antialiasing);
         ptr.setPen(QPen(Qt::black, 5));
 
         QPointF pt(x * 800.0 * 1.6 + 3.5, y * 800.0 + 3.5);
