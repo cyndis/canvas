@@ -19,6 +19,7 @@ WacomThread::WacomThread(QObject *parent) :
 void WacomThread::run()
 {
     int x=0, y=0, pressure=0;
+    int evs=0;
     struct input_event ev;
     for (;;) {
         fread(&ev, sizeof(struct input_event), 1, _file);
@@ -26,14 +27,18 @@ void WacomThread::run()
             continue;
 
         switch (ev.code) {
-        case CODE_X: x = ev.value; break;
-        case CODE_Y: y = ev.value; break;
+        case CODE_X: x = ev.value; evs += 1; break;
+        case CODE_Y: y = ev.value; evs += 1; break;
         case CODE_PRESSURE: pressure = ev.value; break;
+        default: continue;
         }
 
-        float mx = (float)x / (14720 * 1.0);
-        float my = (float)y / (9200 * 1.0);
-        float mp = (float)pressure / 1023;
-        emit onStateChanged(mx, my, mp);
+        if (evs == 2) {
+            evs = 0;
+            float mx = (float)x / (14720 * 1.0);
+            float my = (float)y / (9200 * 1.0);
+            float mp = (float)pressure / 1023;
+            emit onStateChanged(mx, my, mp);
+        }
     }
 }

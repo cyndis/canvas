@@ -53,15 +53,19 @@ void MainWindow::updateWacom(float x, float y, float p)
     if (down) {
         QPainter ptr(&_pixmap);
         ptr.setRenderHint(QPainter::Antialiasing);
+
         ptr.setPen(QPen(_eraser ? Qt::white : Qt::black, 5));
 
-        QPointF pt(x * 800.0 * 1.6 + 3.5, y * 800.0 + 3.5);
+        QPointF pt(x * _scene->width() + 3.5, y * _scene->height() + 3.5);
 
         if (_was_down) {
             ptr.drawLine(_prev_point, pt);
         }
 
-        ptr.drawPoint(x * 800.0 * 1.6 + 3.5, y * 800.0 + 3.5);
+        ptr.setPen(QPen());
+        ptr.setBrush(QBrush(_eraser ? Qt::white : Qt::black));
+
+        ptr.drawEllipse(pt, 2.5, 2.5);
         ptr.end();
         _pixmap_item->setPixmap(_pixmap);
 
