@@ -19,8 +19,10 @@ public:
 
 public slots:
     void updateWacom(float x, float y, float p);
+    void updateWacomButton(int button, bool state);
     void clearCanvas();
     void toggleEraser();
+    void setEraserEnabled(bool enabled);
 
 protected:
     void keyPressEvent(QKeyEvent *);

@@ -15,6 +15,7 @@ protected:
     
 signals:
     void onStateChanged(float x, float y, float pressure);
+    void onButtonChanged(int button, bool state);
     
 public slots:
 

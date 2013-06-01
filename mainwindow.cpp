@@ -37,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&_wacom, SIGNAL(onStateChanged(float,float,float)),
             this, SLOT(updateWacom(float,float,float)));
+    connect(&_wacom, SIGNAL(onButtonChanged(int,bool)),
+            this, SLOT(updateWacomButton(int,bool)));
     _wacom.start();
 }
 
@@ -80,6 +82,12 @@ void MainWindow::updateWacom(float x, float y, float p)
     }
 }
 
+void MainWindow::updateWacomButton(int button, bool state)
+{
+    Q_UNUSED(button);
+    setEraserEnabled(state);
+}
+
 void MainWindow::clearCanvas()
 {
     _pixmap.fill(Qt::white);
@@ -88,7 +96,12 @@ void MainWindow::clearCanvas()
 
 void MainWindow::toggleEraser()
 {
-    _eraser = !_eraser;
+    setEraserEnabled(!_eraser);
+}
+
+void MainWindow::setEraserEnabled(bool enabled)
+{
+    _eraser = enabled;
     if (_eraser) {
         ui->actionEraser->setText("Pen");
         _cursor_type_item->setVisible(true);
