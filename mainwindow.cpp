@@ -56,7 +56,9 @@ void MainWindow::updateWacom(float x, float y, float p)
         QPainter ptr(&_pixmap);
         ptr.setRenderHint(QPainter::Antialiasing);
 
-        ptr.setPen(QPen(_eraser ? Qt::white : Qt::black, 5));
+        QPen line_pen = QPen(_eraser ? Qt::white : Qt::black, 5);
+        line_pen.setCapStyle(Qt::RoundCap);
+        ptr.setPen(line_pen);
 
         QPointF pt(x * _scene->width() + 3.5, y * _scene->height() + 3.5);
 
@@ -67,7 +69,7 @@ void MainWindow::updateWacom(float x, float y, float p)
         ptr.setPen(QPen());
         ptr.setBrush(QBrush(_eraser ? Qt::white : Qt::black));
 
-        ptr.drawEllipse(pt, 2.5, 2.5);
+        ptr.drawEllipse(pt, 2, 2);
         ptr.end();
         _pixmap_item->setPixmap(_pixmap);
 
