@@ -66,7 +66,7 @@ void MainWindow::updateWacom(float x, float y, float p)
             ptr.drawLine(_prev_point, pt);
         }
 
-        ptr.setPen(QPen());
+        ptr.setPen(QPen(Qt::transparent));
         ptr.setBrush(QBrush(_eraser ? Qt::white : Qt::black));
 
         ptr.drawEllipse(pt, 2, 2);
