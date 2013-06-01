@@ -5,6 +5,8 @@
 #include <QPixmap>
 #include <QKeyEvent>
 
+#define CANVAS_HEIGHT 800
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -16,9 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QGraphicsView* view = ui->gv;
     view->setRenderHint(QPainter::Antialiasing);
-    _scene = new QGraphicsScene(0, 0, 800 * 1.6, 800, this);
+    _scene = new QGraphicsScene(0, 0, CANVAS_HEIGHT * 1.6, CANVAS_HEIGHT, this);
     view->setScene(_scene);
-    view->setFixedSize(800 * 1.6, 800);
+    view->setFixedSize(_scene->width(), _scene->height());
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -47,7 +49,7 @@ void MainWindow::updateWacom(float x, float y, float p)
 {
     bool down = (p > 0.16);
     if (x > 0.0 && y > 0.0) {
-        _cursor_item->setPos(x * 800.0 * 1.6, y * 800.0);
+        _cursor_item->setPos(x * _scene->width(), y * _scene->height());
     }
 
     if (down) {
