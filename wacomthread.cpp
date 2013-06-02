@@ -1,11 +1,48 @@
 #include "wacomthread.h"
 #include <linux/input.h>
+#include <fcntl.h>
 #include <QDebug>
+#include <QDir>
+#include <stdlib.h>
+
+bool isWacomDevice(QString path) {
+    int fd = open(path.toUtf8(), O_RDONLY);
+    if (fd == -1) {
+        return false;
+    }
+
+    char buffer[32];
+    ioctl(fd, EVIOCGNAME(32), buffer);
+    QString name(buffer);
+    if (name.contains("Wacom") && name.contains("Pen"))
+        return true;
+    else
+        return false;
+}
+
+QString getWacomDevicePath() {
+    QDir dir("/dev/input");
+    QStringList devs = dir.entryList(QStringList() << "event*",
+                                     QDir::Dirs | QDir::System);
+    for (const QString &file : devs) {
+        QString path = QString("/dev/input/") + file;
+        if (isWacomDevice(path))
+            return path;
+    }
+
+    return QString();
+}
 
 WacomThread::WacomThread(QObject *parent) :
     QThread(parent), _file(0)
 {
-    _file = fopen("/dev/input/event22", "r");
+    QString path = getWacomDevicePath();
+    if (path.isNull()) {
+        qFatal("Failed to find Wacom event file."
+               "Make sure you have permissions to /dev/input/event* files.");
+        exit(1);
+    }
+    _file = fopen(path.toUtf8(), "r");
     if (!_file)
         qFatal("Failed to open event file");
 }

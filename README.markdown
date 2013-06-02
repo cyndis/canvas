@@ -3,7 +3,6 @@ Canvas
 
 Issues:
 
-- Input device number is hardcoded to 22
 - Device coordinate bounds are hardcoded to values for the Bamboo Pen
 
 Dependencies:
