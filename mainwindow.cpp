@@ -10,7 +10,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _pixmap(800*1.6,800),
+    _pixmap(CANVAS_HEIGHT*1.6,CANVAS_HEIGHT),
     _was_down(false),
     _eraser(false)
 {
@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _pixmap_item->setPos(0, 0);
 
     QPen cursor_pen(Qt::red, 3);
-    _cursor_item = _scene->addEllipse(-1, -1, 7, 7, cursor_pen);
+    _cursor_item = _scene->addEllipse(-3.5, -3.5, 7, 7, cursor_pen);
     _cursor_type_item = _scene->addSimpleText("Eraser");
     _cursor_type_item->setParentItem(_cursor_item);
     _cursor_type_item->setPos(10,5);
@@ -62,7 +62,7 @@ void MainWindow::updateWacom(float x, float y, float p)
         line_pen.setCapStyle(Qt::RoundCap);
         ptr.setPen(line_pen);
 
-        QPointF pt(x * _scene->width() + 3.5, y * _scene->height() + 3.5);
+        QPointF pt(x * _scene->width(), y * _scene->height());
 
         if (_was_down) {
             ptr.drawLine(_prev_point, pt);
