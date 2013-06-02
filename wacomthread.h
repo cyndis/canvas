@@ -9,6 +9,7 @@ class WacomThread : public QThread
     Q_OBJECT
 public:
     explicit WacomThread(QObject *parent = 0);
+    ~WacomThread();
 
 protected:
     void run();
@@ -20,7 +21,8 @@ signals:
 public slots:
 
 private:
-    FILE* _file;
+    int _file;
+    int _quit[2];
     
 };
 

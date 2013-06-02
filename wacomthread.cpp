@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QDir>
 #include <stdlib.h>
+#include <unistd.h>
 
 bool isWacomDevice(QString path) {
     int fd = open(path.toUtf8(), O_RDONLY);
@@ -13,6 +14,8 @@ bool isWacomDevice(QString path) {
 
     char buffer[32];
     ioctl(fd, EVIOCGNAME(32), buffer);
+    close(fd);
+
     QString name(buffer);
     if (name.contains("Wacom") && name.contains("Pen"))
         return true;
@@ -34,7 +37,7 @@ QString getWacomDevicePath() {
 }
 
 WacomThread::WacomThread(QObject *parent) :
-    QThread(parent), _file(0)
+    QThread(parent), _file(0), _quit{0,0}
 {
     QString path = getWacomDevicePath();
     if (path.isNull()) {
@@ -42,15 +45,31 @@ WacomThread::WacomThread(QObject *parent) :
                "Make sure you have permissions to /dev/input/event* files.");
         exit(1);
     }
-    _file = fopen(path.toUtf8(), "r");
+    _file = open(path.toUtf8(), O_RDONLY);
     if (!_file)
         qFatal("Failed to open event file");
+    pipe(_quit);
+}
+
+WacomThread::~WacomThread()
+{
+
+    write(_quit[1], ".", 1);
+    QThread::wait();
+    if (_file)
+        close(_file);
+    if (_quit[0])
+        close(_quit[0]);
+    if (_quit[1])
+        close(_quit[1]);
 }
 
 #define TYPE_ABS 3
 #define TYPE_BTN 1
 
 #define CODE_BTN1 331
+#define CODE_BTN2 332
+#define CODE_DETECTED 320
 
 #define CODE_X 0
 #define CODE_Y 1
@@ -61,8 +80,19 @@ void WacomThread::run()
     int x=0, y=0, pressure=0;
     int evs=0;
     struct input_event ev;
+    fd_set read_fds;
+
+    int max_fd = (_file > _quit[0]) ? _file : _quit[0];
+
     for (;;) {
-        fread(&ev, sizeof(struct input_event), 1, _file);
+        FD_ZERO(&read_fds);
+        FD_SET(_file, &read_fds);
+        FD_SET(_quit[0], &read_fds);
+        if (select(max_fd+1, &read_fds, NULL, NULL, NULL) < 0)
+            break;
+        if (FD_ISSET(_quit[0], &read_fds))
+            break;
+        read(_file, &ev, sizeof(struct input_event));
 
         if (ev.type == TYPE_ABS) {
             switch (ev.code) {
@@ -81,7 +111,8 @@ void WacomThread::run()
             }
         } else if (ev.type == TYPE_BTN) {
             switch (ev.code) {
-            case CODE_BTN1: emit onButtonChanged(0, ev.value == 1); break;
+            case CODE_BTN1: emit onButtonChanged(1, ev.value == 1); break;
+            case CODE_BTN2: emit onButtonChanged(2, ev.value == 1); break;
             }
         }
     }
